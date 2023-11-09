@@ -8,11 +8,10 @@ class SystemAutomator:
 
     def buscar_imagem(self, imagem):
         caminho_imagem = "src/img/" + imagem + ".png"
-        posicao = pyautogui.locateOnScreen(caminho_imagem, region=(0, 0, pyautogui.size().width, pyautogui.size().height), grayscale=True, confidence=0.9)
+        posicao = pyautogui.locateOnScreen(caminho_imagem, region=(0, 0, pyautogui.size().width, pyautogui.size().height), grayscale=True, confidence=0.99)
         if posicao is not None:
             return posicao
-        else:
-            return False
+
 
 
     def clique(self, posicao=""):
@@ -21,60 +20,96 @@ class SystemAutomator:
             centro_y = posicao.top + posicao.height / 2
             pyautogui.click(centro_x, centro_y)
 
+    
 
-    def clique_imagem(self, imagem, attempts=30):
-        for i in range(attempts):
-            imagem_encontrada = self.buscar_imagem(imagem)
+    def verificar_imagem(self, imagem):
+        imagem_encontrada = self.buscar_imagem(imagem)
+        if imagem_encontrada:
+            print('verificar_imagem - TRUE')
+            return True
+        else:
+            print('verificar_imagem - FALSE')
+            time.sleep(1)
+            return False
             
-            if imagem_encontrada is not False:
-                self.clique(imagem_encontrada)
-                print(f"CLIQUE IMAGEM: {imagem} - TRUE")
-                break
-            else:
-                time.sleep(2)
-                print(f"CLIQUE IMAGEM: {imagem} - FALSE")
-            if i == attempts -1:
-                print("Limite de tentativas atingido")
-        
 
-    def clique_imagem_tempo(self, imagem):
-        for _ in range(3):
+    
+    def clique_imagem(self, imagem):
+        while True:
+            imagem_encontrada = self.buscar_imagem(imagem)
+            if imagem_encontrada:
+                print(f'clique_imagem - {imagem} - TRUE')
+                self.clique(imagem_encontrada)
+                break
+
+
+
+    def clique_imagem_tentativas(self, imagem, tentativas):
+        for i in range(tentativas):
             imagem_encontrada = self.buscar_imagem(imagem)
             if imagem_encontrada is not False:
+                print(f'clique_imagem_tentativas - {i}')
                 self.clique(imagem_encontrada)
-                return
-            time.sleep(2)
-        raise pyautogui.ImageNotFoundException
+                return True
+            else:
+                time.sleep(1)
+                return False
+
 
 
     def aguardar_imagem(self, imagem, tentativas=0):
         if tentativas == 0:
+            print(f'aguardar_imagem - {imagem}')
             while True:
                 resultado_busca = self.buscar_imagem(imagem)
-                if resultado_busca == False:
-                    print("AGUARDAR IMAGEM - TRUE")
-                    time.sleep(2)
+                if resultado_busca:
+                    print(f'aguardar_imagem - {imagem} - TRUE')
+                    return imagem
                 else:
-                    return True
+                    time.sleep(2)
+                    
         else:
-            for tentativa in range(tentativas):
-                print("AGUARDAR IMAGEM, TENTATIVA: {tentativa}")
+            for i in range(tentativas):
                 resultado_busca = self.buscar_imagem(imagem)
-                if resultado_busca == False:
-                    time.sleep(2)
+                if resultado_busca:
+                    print(f'aguardar_imagem - {imagem} - TRUE')
+                    return imagem
                 else:
-                    return True
-            return False
+                    time.sleep(2)
+        
+
+
+    def aguardar_imagens(self, imagens, tentativas=0):
+        if tentativas == 0:
+            while True:
+                for imagem in imagens:
+                    resultado_busca = self.buscar_imagem(imagem)
+                    if resultado_busca:
+                        print(f'aguardar_imagem - {imagem} - TRUE')
+                        return imagem
+                    else:
+                        print(f'aguardar_imagem - {imagem} - FALSE')
+                        time.sleep(2)
+        else:
+            for i in range(tentativas):
+                for imagem in imagens:
+                    resultado_busca = self.buscar_imagem(imagem)
+                    if resultado_busca:
+                        print(f'aguardar_imagem - {imagem} - TRUE')
+                        return imagem
+                    else:
+                        print(f'aguardar_imagem - {imagem} - FALSE')
+                        time.sleep(2)
+  
     
 
-    def task_kill(self):
-        chrome = "chrome.exe"
-        os.system(f"taskkill /F /IM {chrome}")
-        print("Task-Kill")
+    def task_kill(self, programa):
+        os.system(f"taskkill /F /IM {programa}")
 
 
-    def data_inicial(self):
-        # Primeiro Dia do Mês Passado
+
+    def data_inicial_mes_ano(self):
+        # Primeiro dia do Mes Passado
         now = datetime.datetime.now()
         past_month = now.month - 1 if now.month != 1 else 12
         year_of_past_month = now.year - 1 if past_month == 12 else now.year
@@ -83,20 +118,21 @@ class SystemAutomator:
         return data_inicial
 
 
-    def data_final(self):
-        # Ultimo Dia do Mês Passado
+
+    def data_final_mes_ano(self):
+        # Ultimo dia do Mes Passado
         now = datetime.datetime.now()
         first_day_of_month = now.replace(day=1)
         last_day_of_previous_month = first_day_of_month - datetime.timedelta(days=1)
-        data_inicial = last_day_of_previous_month.strftime("%d/%m/%Y")
-        return data_inicial
+        data_final = last_day_of_previous_month.strftime("%d/%m/%Y")
+        return data_final
 
 
-    def data_mes_ano(self):
-        # Mês Passado e Ano
+
+    def data_mes_passado_ano(self):
         now = datetime.datetime.now()
         past_month = now.month - 1 if now.month != 1 else 12
         year_of_past_month = now.year - 1 if past_month == 12 else now.year
         full_date = f"{year_of_past_month}{past_month:02d}"
-        data_inicial = datetime.datetime.strptime(full_date, "%Y%m").strftime("%m.%Y")
-        return data_inicial
+        data_mes_passado_ano = datetime.datetime.strptime(full_date, "%Y%m").strftime("%m.%Y")
+        return data_mes_passado_ano
