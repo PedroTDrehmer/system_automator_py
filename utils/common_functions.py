@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 from selenium.webdriver import Chrome
-from selenium.webdriver import *
+from selenium.webdriver import ChromeOptions
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
