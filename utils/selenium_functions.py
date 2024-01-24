@@ -7,6 +7,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.common.by import By
+from utils.variables import Paths
+from utils.files_automator import data_mes_ano
 
 
 def gen_browser() -> Optional[tuple[WebDriver, WebDriverWait]]:
@@ -28,6 +30,12 @@ def click(driver: WebDriver, path: str, by = By.XPATH):
     element = driver.find_element(by, path)
     element.click()
     return element
+
+
+def selenium_screenshot(driver:WebDriver, nome, tipo):
+    path_capture_screenshot = f"{Paths.PATH_DRIVE}\\{data_mes_ano()}\\{nome}\\{tipo}\\SEFAZ BA.png"
+    driver.save_screenshot(path_capture_screenshot)
+    print("SCREENSHOT")
 
 
 def close(driver: WebDriver):
